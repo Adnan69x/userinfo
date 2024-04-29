@@ -1,35 +1,41 @@
 import logging
-from pyrogram import Client, filters
+from telethon import TelegramClient, events
 import config
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize the Pyrogram Client
-app = Client("bot_session", api_id=config.API_ID, api_hash=config.API_HASH, bot_token=config.BOT_TOKEN)
+# Initialize the Telegram Client
+client = TelegramClient('bot_session', config.API_ID, config.API_HASH)
 
-@app.on_message(filters.command("info", prefixes='/') & filters.regex(r'^/info (\@\w+)'))
-async def handler(client, message):
-    username = message.matches[0].group(1)  # Extract the username from the command
-    if username:
-        try:
-            user = await app.get_users(username)
-            user_full_name = f"{user.first_name} {user.last_name if user.last_name else ''}".strip()
-            user_id = user.id
-            username = user.username
-            response_message = (
-                f"<b>User ID:</b> {user_id}\n"
-                f"<b>Full Name:</b> {user_full_name}\n"
-                f"<b>Username:</b> @{username if username else 'No username'}"
-            )
-            await message.reply_text(response_message)
-            logger.info(f"Provided info for username {username}.")
-        except Exception as e:
-            await message.reply_text("Failed to retrieve information for the given username.")
-            logger.error(f"Error retrieving user info: {str(e)}")
-    else:
-        await message.reply_text("Please provide a valid username after the /info command.")
+async def main():
+    await client.start(bot_token=config.BOT_TOKEN)
+    logger.info("Bot has been started successfully.")
+
+    @client.on(events.NewMessage(pattern=r'/info (\@\w+)'))
+    async def handler(event):
+        username = event.pattern_match.group(1)  # Extract the username from the command
+        if username:
+            try:
+                user = await client.get_entity(username)
+                user_full_name = f"{user.first_name} {user.last_name if user.last_name else ''}".strip()
+                user_id = user.id
+                username = user.username
+                response_message = (
+                    f"User ID: {user_id}\n"
+                    f"Full Name: {user_full_name}\n"
+                    f"Username: @{username if username else 'No username'}"
+                )
+                await event.respond(response_message)
+                logger.info(f"Provided info for username {username}.")
+            except Exception as e:
+                await event.respond("Failed to retrieve information for the given username.")
+                logger.error(f"Error retrieving user info: {str(e)}")
+        else:
+            await event.respond("Please provide a valid username after the /info command.")
+
+    await client.run_until_disconnected()
 
 if __name__ == '__main__':
-    app.run()
+    client.loop.run_until_complete(main())
