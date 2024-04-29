@@ -31,7 +31,9 @@ async def userinfo(message: types.Message):
                                 f"Full Name: {user['full_name']}\n"
                                 f"Username: {user['username']}")
         else:
-            await message.reply("No information available for the provided username.")
+            # Provide a more detailed explanation why the info is not available
+            await message.reply(f"No information available for the provided username '{username_param}'. "
+                                "The user must interact with the bot by sending /start before their information can be accessed.")
     else:
         await message.reply("Please provide a username with the command. Example: /info yourusername")
 
