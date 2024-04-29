@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Initialize the Telegram Client
-client = TelegramClient("bot_session", config.API_ID, config.API_HASH)
+client = TelegramClient('bot_session', config.API_ID, config.API_HASH)
 
 async def main():
     await client.start(bot_token=config.BOT_TOKEN)
