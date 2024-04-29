@@ -39,6 +39,11 @@ async def main():
                     response_message += f"\nGroup ID: {group_id}"
                 await event.respond(response_message)
                 logger.info(f"Provided info for username {username}.")
+            except ValueError:
+                # ValueError occurs when the user is not found
+                if not group_error:
+                    await event.respond("User not found.")
+                logger.error("User not found.")
             except Exception as e:
                 if not group_error:
                     await event.respond("Failed to retrieve information for the given username.")
