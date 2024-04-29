@@ -28,9 +28,9 @@ async def user_info(message: types.Message):
     username = user.username
     
     await message.reply(
-        f"User ID: {user_id}\n"
-        f"Full Name: {full_name}\n"
-        f"Username: {username}"
+        f"User ID: {message.user_id}\n"
+        f"Full Name: {message.full_name}\n"
+        f"Username: {message.username}"
     )
 
 if __name__ == '__main__':
