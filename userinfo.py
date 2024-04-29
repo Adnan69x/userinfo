@@ -17,11 +17,13 @@ async def user_info(message: types.Message):
         full_name = user.full_name
         group_id = None
         last_name_update = user.username
+        client_info = user.client
         await message.reply(
             f"User ID: {user_id}\n"
             f"Full Name: {full_name}\n"
             f"Group ID: {group_id}\n"
-            f"Last Username Update: {last_name_update}"
+            f"Last Username Update: {last_name_update}\n"
+            f"Client Info: {client_info}"
         )
     else:  # If the command is sent in a group
         target_username_or_id = message.get_args()
@@ -33,22 +35,27 @@ async def user_info(message: types.Message):
         except Exception as e:
             await message.reply(f"Error: {e}")
             return
-        user_id = user.id
-        full_name = user.full_name
-        username = user.username
-        situation = user.status
-        join_date = user.joined_date
-        messages_count = user.total_count
-        last_message = None  # Implement this if available in the library
-        await message.reply(
-            f"ID: {user_id}\n"
-            f"Name: {full_name}\n"
-            f"Username: {username}\n"
-            f"Situation: {situation}\n"
-            f"Join: {join_date}\n"
-            f"Messages: {messages_count}\n"
-            f"Last Message: {last_message}"
-        )
+        if isinstance(user, types.User):
+            user_id = user.id
+            full_name = user.full_name
+            username = user.username
+            situation = user.status
+            join_date = user.joined_date
+            messages_count = user.total_count
+            last_message = None  # Implement this if available in the library
+            client_mention = user.client.mention()
+            await message.reply(
+                f"ID: {user_id}\n"
+                f"Name: {full_name}\n"
+                f"Username: {username}\n"
+                f"Situation: {situation}\n"
+                f"Join: {join_date}\n"
+                f"Messages: {messages_count}\n"
+                f"Last Message: {last_message}\n"
+                f"Client Info: {client_mention}"
+            )
+        else:
+            await message.reply("User not found.")
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
