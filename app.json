@@ -9,7 +9,7 @@
     "userinfo",
     "userinfo",
     "telegram-bot",
-    "telehon"
+    "telethon"
     ],
     "env": {
       "API_ID": {
