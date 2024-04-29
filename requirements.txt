@@ -1,1 +1,3 @@
 telethon
+./setup.sh
+chmod +x setup.sh
