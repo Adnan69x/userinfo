@@ -1,5 +1,6 @@
 import logging
 from telethon import TelegramClient, events
+from telethon.tl.types import ChannelParticipantsRecent
 import config
 
 # Set up logging
@@ -18,17 +19,22 @@ async def main():
         if event.is_group:
             try:
                 await event.respond("Gathering group member information...")
-                all_participants = await client.get_participants(event.chat_id)
+                all_participants = await client.get_participants(event.chat, aggressive=True)  # aggressive=True to ensure fetching all available data
 
                 for user in all_participants:
+                    # Fetch additional fields from participant object
+                    join_date = getattr(user, 'date', 'Unknown')
+                    messages_count = getattr(user, 'messages', 'N/A')  # For channels where message count is available
+                    last_message_date = getattr(user.status, 'was_online', 'Unknown') if user.status else 'Unknown'
+
                     user_info = (
                         f"ID: {user.id}\n"
                         f"Name: {user.first_name} {user.last_name if user.last_name else ''}\n"
                         f"Username: @{user.username if user.username else 'No username'}\n"
-                        f"Situation: {user.status.__class__.__name__}\n"
-                        f"Join: {user.date if user.date else 'Unknown'}\n"
-                        f"Messages: {user.participant.messages if hasattr(user, 'participant') else 'N/A'}\n"
-                        f"Last Message: {user.status.was_online if hasattr(user.status, 'was_online') else 'Unknown'}\n"
+                        f"Situation: {user.status.__class__.__name__ if user.status else 'No status'}\n"
+                        f"Join: {join_date}\n"
+                        f"Messages: {messages_count}\n"
+                        f"Last Message: {last_message_date}\n"
                     )
                     await event.respond(user_info)
 
