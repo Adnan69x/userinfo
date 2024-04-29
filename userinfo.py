@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Initialize the Telegram Client
-client = TelegramClient('bot_session', int(config.API_ID), config.API_HASH)
+client = TelegramClient('bot_session', config.API_ID, config.API_HASH)
 
 async def main():
     await client.start(bot_token=config.BOT_TOKEN)
@@ -30,11 +30,15 @@ async def main():
                 )
                 await event.respond(response_message)
                 logger.info(f"Provided info for username {username}.")
+            except ValueError:
+                await event.respond("Please provide a valid username after the /info command.")
+                logger.error("Invalid username provided.")
             except Exception as e:
-                await event.respond("Failed to retrieve information for the given username.")
+                await event.respond("An error occurred while processing your request.")
                 logger.error(f"Error retrieving user info: {str(e)}")
         else:
             await event.respond("Please provide a valid username after the /info command.")
+            logger.error("No username provided.")
 
     await client.run_until_disconnected()
 
