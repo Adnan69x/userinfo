@@ -1,6 +1,7 @@
 import logging
 from telethon import TelegramClient, events
-from telethon.tl.types import ChannelParticipantsRecent
+from telethon.tl.functions.channels import GetParticipantRequest
+from telethon.tl.types import ChannelParticipantAdmin, ChannelParticipantsAdmins
 import config
 
 # Set up logging
@@ -14,44 +15,54 @@ async def main():
     await client.start(bot_token=config.BOT_TOKEN)
     logger.info("Bot has been started successfully.")
 
-    @client.on(events.NewMessage(pattern=r'/info'))
+    @client.on(events.NewMessage(pattern=r'/info(?: (\@\w+))?'))
     async def handler(event):
+        username = event.pattern_match.group(1)  # Extract the username from the command
+
         if event.is_group:
             try:
-                await event.respond("Gathering group member information...")
-                all_participants = await client.get_participants(event.chat, aggressive=True)  # aggressive=True to ensure fetching all available data
+                entity = await client.get_entity(event.chat)
+                if username:  # If a username is provided in the command
+                    participant_info = await client(GetParticipantRequest(
+                        channel=entity,
+                        participant=username
+                    ))
+                    participant = participant_info.participant
+                    user = await client.get_entity(username)
+                else:
+                    user = await event.get_sender()  # If no username, get info of the sender
+                    participant = await client(GetParticipantRequest(
+                        channel=entity,
+                        participant=user.id
+                    )).participant
 
-                for user in all_participants:
-                    # Fetch additional fields from participant object
-                    join_date = getattr(user, 'date', 'Unknown')
-                    messages_count = getattr(user, 'messages', 'N/A')  # For channels where message count is available
-                    last_message_date = getattr(user.status, 'was_online', 'Unknown') if user.status else 'Unknown'
-
-                    user_info = (
-                        f"ID: {user.id}\n"
-                        f"Name: {user.first_name} {user.last_name if user.last_name else ''}\n"
-                        f"Username: @{user.username if user.username else 'No username'}\n"
-                        f"Situation: {user.status.__class__.__name__ if user.status else 'No status'}\n"
-                        f"Join: {join_date}\n"
-                        f"Messages: {messages_count}\n"
-                        f"Last Message: {last_message_date}\n"
-                    )
-                    await event.respond(user_info)
-
+                situation = 'Admin' if isinstance(participant, ChannelParticipantAdmin) else 'Member'
+                roles = participant.rank if hasattr(participant, 'rank') and participant.rank else 'No specific role'
+                join_date = participant.date if hasattr(participant, 'date') else 'Unknown'
+                
+                info = (
+                    f"ID: {user.id}\n"
+                    f"Name: {user.first_name} {user.last_name if user.last_name else ''}\n"
+                    f"Username: @{user.username if user.username else 'No username'}\n"
+                    f"Situation: {situation}\n"
+                    f"Roles: {roles}\n"
+                    f"Join: {join_date}\n"
+                    f"Messages: 'Not available due to API limitations'\n"
+                    f"Last Message: 'Not available due to API limitations'"
+                )
+                await event.respond(info)
             except Exception as e:
-                await event.respond("Failed to retrieve group information.")
-                logger.error(f"Error retrieving group info: {str(e)}")
-
-        elif event.is_private:
+                await event.respond("Failed to retrieve information for the given username.")
+                logger.error(f"Error retrieving user info: {str(e)}")
+        else:  # Handling the command in private chats
             user = await event.get_sender()
-            group_id = event.chat_id if event.is_group else "Private chat"
             last_update = user.status
             last_update_desc = f'{last_update.__class__.__name__} at {last_update.was_online if hasattr(last_update, "was_online") else "N/A"}' if last_update else 'N/A'
 
             personal_info = (
                 f"User ID: {user.id}\n"
                 f"Full Name: {user.first_name} {user.last_name if user.last_name else ''}\n"
-                f"Group ID: {group_id}\n"
+                f"Username: @{user.username if user.username else 'No username'}\n"
                 f"Last update: {last_update_desc}"
             )
             await event.respond(personal_info)
