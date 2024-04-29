@@ -17,13 +17,11 @@ async def user_info(message: types.Message):
         full_name = user.full_name
         group_id = None
         last_name_update = user.username
-        client_info = user.client
         await message.reply(
             f"User ID: {user_id}\n"
             f"Full Name: {full_name}\n"
             f"Group ID: {group_id}\n"
-            f"Last Username Update: {last_name_update}\n"
-            f"Client Info: {client_info}"
+            f"Last Username Update: {last_name_update}"
         )
     else:  # If the command is sent in a group
         target_username_or_id = message.get_args()
@@ -43,7 +41,7 @@ async def user_info(message: types.Message):
             join_date = user.joined_date
             messages_count = user.total_count
             last_message = None  # Implement this if available in the library
-            client_mention = user.client.mention()
+            client_info = message.from_user.mention()
             await message.reply(
                 f"ID: {user_id}\n"
                 f"Name: {full_name}\n"
@@ -52,7 +50,7 @@ async def user_info(message: types.Message):
                 f"Join: {join_date}\n"
                 f"Messages: {messages_count}\n"
                 f"Last Message: {last_message}\n"
-                f"Client Info: {client_mention}"
+                f"Client Info: {client_info}"
             )
         else:
             await message.reply("User not found.")
