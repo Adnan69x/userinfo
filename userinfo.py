@@ -1,7 +1,7 @@
 import logging
 from telethon import TelegramClient, events
 from telethon.tl.functions.channels import GetParticipantRequest
-from telethon.errors import ValueError as TelethonValueError
+from telethon.errors import UserNotParticipantError, TelethonError
 from telethon.tl.types import ChannelParticipantAdmin, ChannelParticipantsAdmins
 import config
 
@@ -31,7 +31,7 @@ async def main():
                         ))
                         participant = participant_info.participant
                         user = await client.get_entity(username)
-                    except TelethonValueError:
+                    except UserNotParticipantError:
                         await event.respond(f"The user {username} is not a member of this group or has privacy settings blocking this.")
                         return
                 else:
@@ -56,9 +56,9 @@ async def main():
                     f"Last Message: 'Not available due to API limitations'"
                 )
                 await event.respond(info)
-            except Exception as e:
-                await event.respond("Failed to retrieve information for the given username.")
-                logger.error(f"Error retrieving user info: {str(e)}")
+            except TelethonError as e:
+                await event.respond("Failed to retrieve information for the given username due to a Telegram API error.")
+                logger.error(f"Telethon API Error: {str(e)}")
         else:  # Handling the command in private chats
             user = await event.get_sender()
             last_update = user.status
