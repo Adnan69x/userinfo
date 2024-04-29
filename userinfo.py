@@ -1,42 +1,42 @@
-from aiogram import Bot, Dispatcher, types, executor
-from config import API_TOKEN
+import logging
+from telethon import TelegramClient, events
+import config
 
-# Initialize bot and dispatcher
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+# Set up logging
+logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
+                    level=logging.WARNING)
 
-# In-memory storage for user data
-user_data = {}
+# Telethon client setup
+client = TelegramClient('bot', config.API_ID, config.API_HASH).start(bot_token=config.BOT_TOKEN)
 
-# Handler to store user data
-@dp.message_handler(commands=['start'])
-async def start(message: types.Message):
-    user = message.from_user
-    user_data[user.username] = {
-        'id': user.id,
-        'full_name': user.full_name,
-        'username': user.username
-    }
-    await message.reply("You are now registered. Use /info <username> to get info.")
-
-# Function to handle user info request with a username parameter
-@dp.message_handler(commands=['info'])
-async def userinfo(message: types.Message):
-    parts = message.text.split(maxsplit=1)
-    if len(parts) == 2:
-        _, username_param = parts
-        if username_param in user_data:
-            user = user_data[username_param]
-            await message.reply(f"User ID: {user['id']}\n"
-                                f"Full Name: {user['full_name']}\n"
-                                f"Username: {user['username']}")
+async def print_user_information(event):
+    # Getting user info
+    if event.is_private:  # Checks if the event is a private message
+        user = await event.get_sender()
+        user_full_name = user.first_name
+        if user.last_name:
+            user_full_name += ' ' + user.last_name
+        
+        last_update = user.status
+        if last_update:
+            last_update = f'{last_update.__class__.__name__} at {last_update.was_online if hasattr(last_update, "was_online") else "N/A"}'
         else:
-            # Provide a more detailed explanation why the info is not available
-            await message.reply(f"No information available for the provided username '{username_param}'. "
-                                "The user must interact with the bot by sending /start before their information can be accessed.")
-    else:
-        await message.reply("Please provide a username with the command. Example: /info yourusername")
+            last_update = 'N/A'
+        
+        print(f'User ID: {user.id}')
+        print(f'Full Name: {user_full_name}')
+        print(f'Username: {user.username if user.username else "No username"}')
+        print(f'Last update: {last_update}')
 
-# Start the bot
+@client.on(events.NewMessage(pattern='/start'))
+async def start(event):
+    # Reply with user information when the bot receives /start command
+    await print_user_information(event)
+    await event.respond('Here is your information!')
+
+def main():
+    with client:
+        client.run_until_disconnected()
+
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    main()
