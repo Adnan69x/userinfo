@@ -15,6 +15,12 @@ async def main():
 
     @client.on(events.NewMessage(pattern=r'/info (\@\w+)'))
     async def handler(event):
+        # Check if the message is from a group
+        if event.is_group and event.is_channel:
+            group_id = event.chat_id
+        else:
+            group_id = None
+
         username = event.pattern_match.group(1)  # Extract the username from the command
         if username:
             try:
@@ -25,7 +31,8 @@ async def main():
                 response_message = (
                     f"User ID: {user_id}\n"
                     f"Full Name: {user_full_name}\n"
-                    f"Username: @{username if username else 'No username'}"
+                    f"Username: @{username if username else 'No username'}\n"
+                    f"Group ID: {group_id}" if group_id else ""  # Include group ID if available
                 )
                 await event.respond(response_message)
                 logger.info(f"Provided info for username {username}.")
