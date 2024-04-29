@@ -1,7 +1,7 @@
 import logging
 from telethon import TelegramClient, events
 import config
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -11,12 +11,12 @@ logger = logging.getLogger(__name__)
 client = TelegramClient('bot_session', config.API_ID, config.API_HASH)
 
 async def get_user_stats(username):
-    # Placeholder function to fetch user statistics from your database
+    # This function is supposed to fetch user statistics from your database
     return {
         "message_count": 0,
         "last_message": {
             "text": "No messages yet",
-            "timestamp": datetime.now(datetime.timezone.utc)
+            "timestamp": datetime.now(timezone.utc)
         }
     }
 
@@ -32,19 +32,24 @@ async def main():
                 user = await client.get_entity(username)
                 user_full_name = f"{user.first_name} {user.last_name if user.last_name else ''}".strip()
                 user_id = user.id
-                updated_at = datetime.now().isoformat()
 
-                # Retrieve user statistics
-                stats = await get_user_stats(username)
-                
                 response_message = (
                     f"User ID: {user_id}\n"
                     f"Full Name: {user_full_name}\n"
                     f"Username: @{username if username else 'No username'}\n"
-                    f"Total Group Messages: {stats['message_count']}\n"
-                    f"Last Message: \"{stats['last_message']['text']}\" on {stats['last_message']['timestamp'].isoformat()}\n"
-                    f"Updated at: {updated_at}"
+                    f"Updated at: {updated_at}\n"
                 )
+                
+                if event.is_group or event.is_channel:
+                    group_id = event.chat_id
+                    stats = await get_user_stats(username)
+                    updated_at = datetime.now(timezone.utc).isoformat()  # Use timezone.utc for the current time
+                    response_message += (
+                        f"Total Group Messages: {stats['message_count']}\n"
+                        f"Updated at: {updated_at}\n"
+                    )
+                    response_message += f"Group ID: {group_id}"
+
                 await event.respond(response_message)
                 logger.info(f"Provided info for username {username}.")
             except Exception as e:
@@ -57,4 +62,3 @@ async def main():
 
 if __name__ == '__main__':
     client.loop.run_until_complete(main())
-    
