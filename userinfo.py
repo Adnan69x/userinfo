@@ -18,8 +18,10 @@ async def main():
         # Check if the message is from a group or channel
         if event.is_group or event.is_channel:
             group_id = event.chat_id
+            group_error = False
         else:
             group_id = None
+            group_error = True
 
         username = event.pattern_match.group(1)  # Extract the username from the command
         if username:
@@ -38,7 +40,7 @@ async def main():
                 await event.respond(response_message)
                 logger.info(f"Provided info for username {username}.")
             except Exception as e:
-                if group_id:
+                if not group_error:
                     await event.respond("Failed to retrieve information for the given username.")
                 logger.error(f"Error retrieving user info: {str(e)}")
         else:
