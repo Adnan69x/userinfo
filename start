@@ -1,1 +1,1 @@
-python3 -m userinfo
+python3 userinfo.py
