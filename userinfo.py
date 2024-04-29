@@ -23,9 +23,9 @@ async def main():
                 user_id = user.id
                 username = user.username
                 response_message = (
-                    f"User ID: {user_id}\n"
-                    f"Full Name: {user_full_name}\n"
-                    f"Username: @{username if username else 'No username'}"
+                    f"<b>User ID:</b> {user_id}\n"
+                    f"<b>Full Name:</b> {user_full_name}\n"
+                    f"<b>Username:</b> @{username if username else 'No username'}"
                 )
                 await event.respond(response_message)
                 logger.info(f"Provided info for username {username}.")
