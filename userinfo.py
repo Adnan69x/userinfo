@@ -15,8 +15,8 @@ async def main():
 
     @client.on(events.NewMessage(pattern=r'/info (\@\w+)'))
     async def handler(event):
-        # Check if the message is from a group
-        if event.is_group and event.is_channel:
+        # Check if the message is from a group or channel
+        if event.is_group or event.is_channel:
             group_id = event.chat_id
         else:
             group_id = None
@@ -31,9 +31,10 @@ async def main():
                 response_message = (
                     f"User ID: {user_id}\n"
                     f"Full Name: {user_full_name}\n"
-                    f"Username: @{username if username else 'No username'}\n"
-                    f"Group ID: {group_id}" if group_id else ""  # Include group ID if available
+                    f"Username: @{username if username else 'No username'}"
                 )
+                if group_id:  # Include group ID if available
+                    response_message += f"\nGroup ID: {group_id}"
                 await event.respond(response_message)
                 logger.info(f"Provided info for username {username}.")
             except Exception as e:
