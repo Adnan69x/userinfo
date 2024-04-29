@@ -12,18 +12,11 @@ client = TelegramClient('bot_session', config.API_ID, config.API_HASH)
 
 async def get_user_stats(username):
     # Placeholder function to fetch user statistics from your database
-    # Ensure that your database stores datetime with timezone information for accuracy.
-    # This should return something like:
-    # return {
-    #     "message_count": 123,
-    #     "last_message": {"text": "Hello!", "timestamp": datetime.now(datetime.timezone.utc)}
-    # }
-    # For now, this function returns dummy data
     return {
         "message_count": 0,
         "last_message": {
             "text": "No messages yet",
-            "timestamp": datetime.now(datetime.timezone.utc)  # Including timezone
+            "timestamp": datetime.now(datetime.timezone.utc)
         }
     }
 
@@ -39,7 +32,6 @@ async def main():
                 user = await client.get_entity(username)
                 user_full_name = f"{user.first_name} {user.last_name if user.last_name else ''}".strip()
                 user_id = user.id
-                join_date = user.date.isoformat() if user.date else 'No join date available'
                 updated_at = datetime.now().isoformat()
 
                 # Retrieve user statistics
@@ -49,7 +41,6 @@ async def main():
                     f"User ID: {user_id}\n"
                     f"Full Name: {user_full_name}\n"
                     f"Username: @{username if username else 'No username'}\n"
-                    f"Join Date: {join_date}\n"
                     f"Total Group Messages: {stats['message_count']}\n"
                     f"Last Message: \"{stats['last_message']['text']}\" on {stats['last_message']['timestamp'].isoformat()}\n"
                     f"Updated at: {updated_at}"
@@ -66,3 +57,4 @@ async def main():
 
 if __name__ == '__main__':
     client.loop.run_until_complete(main())
+    
