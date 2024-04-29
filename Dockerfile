@@ -1,12 +1,14 @@
-FROM nikolaik/python-nodejs:python3.10-nodejs19
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ffmpeg \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Set the working directory in the container
+WORKDIR /usr/src/app
 
-COPY . /app/
-WORKDIR /app/
-RUN pip3 install --no-cache-dir -U -r requirements.txt
+# Copy the current directory contents into the container at /usr/src/app
+COPY . .
 
-CMD bash start
+# Install any needed dependencies specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Run the bot when the container launches
+CMD ["python3", "userinfo.py"]
