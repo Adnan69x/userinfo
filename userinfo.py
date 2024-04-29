@@ -1,6 +1,7 @@
 import logging
 from telethon import TelegramClient, events
 from telethon.tl.functions.channels import GetParticipantRequest
+from telethon.errors import ValueError as TelethonValueError
 from telethon.tl.types import ChannelParticipantAdmin, ChannelParticipantsAdmins
 import config
 
@@ -23,12 +24,16 @@ async def main():
             try:
                 entity = await client.get_entity(event.chat)
                 if username:  # If a username is provided in the command
-                    participant_info = await client(GetParticipantRequest(
-                        channel=entity,
-                        participant=username
-                    ))
-                    participant = participant_info.participant
-                    user = await client.get_entity(username)
+                    try:
+                        participant_info = await client(GetParticipantRequest(
+                            channel=entity,
+                            participant=username
+                        ))
+                        participant = participant_info.participant
+                        user = await client.get_entity(username)
+                    except TelethonValueError:
+                        await event.respond(f"The user {username} is not a member of this group or has privacy settings blocking this.")
+                        return
                 else:
                     user = await event.get_sender()  # If no username, get info of the sender
                     participant = await client(GetParticipantRequest(
