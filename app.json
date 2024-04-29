@@ -5,15 +5,15 @@
   "keywords": ["telegram", "bot", "telethon", "python"],
   "env": {
     "API_ID": {
-      "description": "Your Telegram API ID",
+      "description": 'Your Telegram API ID',
       "required": true
     },
     "API_HASH": {
-      "description": "Your Telegram API Hash",
+      "description": 'Your Telegram API Hash',
       "required": true
     },
     "BOT_TOKEN": {
-      "description": "Your Telegram Bot Token",
+      "description": 'Your Telegram Bot Token',
       "required": true
     }
   },
