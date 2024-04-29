@@ -1,7 +1,7 @@
 {
-  "name": "Your Telegram Bot",
+  "name": Telegram-User-Info",
   "description": "A Telegram bot developed using Telethon.",
-  "repository": "https://github.com/yourusername/your-telegram-bot",
+  "repository": "https://github.com/Adnan69x/userinfo",
   "keywords": ["telegram", "bot", "telethon", "python"],
   "env": {
     "API_ID": {
