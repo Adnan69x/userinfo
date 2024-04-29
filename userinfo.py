@@ -22,23 +22,13 @@ async def main():
                 user_full_name = f"{user.first_name} {user.last_name if user.last_name else ''}".strip()
                 user_id = user.id
                 username = user.username
-                # Get group info
-                group_id = event.chat_id
-                group = await client.get_entity(group_id)
-                # Get user info in the group
-                participant = await client.get_participants(group_id, usernames=[username])
-                join_date = participant[0].join_date.strftime('%Y-%m-%d %H:%M:%S')
-                message_count = participant[0].stats.messages
                 response_message = (
                     f"User ID: {user_id}\n"
                     f"Full Name: {user_full_name}\n"
-                    f"Username: @{username if username else 'No username'}\n"
-                    f"Group ID: {group_id}\n"
-                    f"Join Date: {join_date}\n"
-                    f"Messages: {message_count}"
+                    f"Username: @{username if username else 'No username'}"
                 )
                 await event.respond(response_message)
-                logger.info(f"Provided info for username {username} in group {group.title}.")
+                logger.info(f"Provided info for username {username}.")
             except Exception as e:
                 await event.respond("Failed to retrieve information for the given username.")
                 logger.error(f"Error retrieving user info: {str(e)}")
