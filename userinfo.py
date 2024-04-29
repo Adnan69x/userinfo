@@ -16,16 +16,16 @@ async def user_info(message: types.Message):
         await message.reply("Please specify a username after the command.")
         return
     
-    if message.chat.type == "private":
-        # If the command is sent in a private chat, retrieve the information of the user who sent the command
-        user = message.from_user
-    else:
-        # If the command is sent in a group, retrieve the information of the mentioned user
-        user = await bot.get_chat(mentioned_username)
+    # Retrieve the user object of the mentioned username
+    try:
+        user = await bot.get_chat_member(message.chat.id, mentioned_username)
+    except Exception as e:
+        await message.reply(f"Error: {e}")
+        return
     
-    user_id = mentioned_username.id
-    full_name = mentioned_username.full_name
-    username = mentioned_username
+    user_id = user.user.id
+    full_name = user.user.full_name
+    username = user.user.username
     
     await message.reply(
         f"User ID: {user_id}\n"
