@@ -3,40 +3,39 @@ from telethon import TelegramClient, events
 import config
 
 # Set up logging
-logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
-                    level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# Telethon client setup
-client = TelegramClient('bot', config.API_ID, config.API_HASH).start(bot_token=config.BOT_TOKEN)
+# Initialize the Telegram Client
+client = TelegramClient('bot_session', config.API_ID, config.API_HASH)
 
-async def print_user_information(event):
-    # Getting user info
-    if event.is_private:  # Checks if the event is a private message
-        user = await event.get_sender()
-        user_full_name = user.first_name
-        if user.last_name:
-            user_full_name += ' ' + user.last_name
-        
-        last_update = user.status
-        if last_update:
-            last_update = f'{last_update.__class__.__name__} at {last_update.was_online if hasattr(last_update, "was_online") else "N/A"}'
+async def main():
+    await client.start(bot_token=config.BOT_TOKEN)
+    logger.info("Bot has been started successfully.")
+
+    @client.on(events.NewMessage(pattern=r'/info (\@\w+)'))
+    async def handler(event):
+        username = event.pattern_match.group(1)  # Extract the username from the command
+        if username:
+            try:
+                user = await client.get_entity(username)
+                user_full_name = f"{user.first_name} {user.last_name if user.last_name else ''}".strip()
+                user_id = user.id
+                username = user.username
+                response_message = (
+                    f"User ID: {user_id}\n"
+                    f"Full Name: {user_full_name}\n"
+                    f"Username: @{username if username else 'No username'}"
+                )
+                await event.respond(response_message)
+                logger.info(f"Provided info for username {username}.")
+            except Exception as e:
+                await event.respond("Failed to retrieve information for the given username.")
+                logger.error(f"Error retrieving user info: {str(e)}")
         else:
-            last_update = 'N/A'
-        
-        print(f'User ID: {user.id}')
-        print(f'Full Name: {user_full_name}')
-        print(f'Username: {user.username if user.username else "No username"}')
-        print(f'Last update: {last_update}')
+            await event.respond("Please provide a valid username after the /info command.")
 
-@client.on(events.NewMessage(pattern='/start'))
-async def start(event):
-    # Reply with user information when the bot receives /start command
-    await print_user_information(event)
-    await event.respond('Here is your information!')
-
-def main():
-    with client:
-        client.run_until_disconnected()
+    await client.run_until_disconnected()
 
 if __name__ == '__main__':
-    main()
+    client.loop.run_until_complete(main())
