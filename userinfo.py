@@ -38,7 +38,8 @@ async def main():
                 await event.respond(response_message)
                 logger.info(f"Provided info for username {username}.")
             except Exception as e:
-                await event.respond("Failed to retrieve information for the given username.")
+                if group_id:
+                    await event.respond("Failed to retrieve information for the given username.")
                 logger.error(f"Error retrieving user info: {str(e)}")
         else:
             await event.respond("Please provide a valid username after the /info command.")
