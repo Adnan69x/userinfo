@@ -16,7 +16,7 @@ def ban(update, context):
 # Define the function to handle the /unban command
 def unban(update, context):
     user_id = update.message.reply_to_message.from_user.id
-    context.bot.restrict_chat_member(update.effective_chat.id, user_id, ChatPermissions(restrict_everyone=False))
+    context.bot.restrict_chat_member(update.effective_chat.id, user_id, ChatPermissions(can_send_messages=True, can_send_media_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True))
     update.message.reply_text(f"User {update.message.reply_to_message.from_user.name} has been unbanned from the group.")
 
 # Define the function to handle regular messages
