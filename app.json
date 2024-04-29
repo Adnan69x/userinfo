@@ -17,7 +17,7 @@
       "required": true
     }
   },
-  "addons": [],
+  "addons": ["heroku-postgresql"],
   "buildpacks": [
     {
       "url": "heroku/python"
