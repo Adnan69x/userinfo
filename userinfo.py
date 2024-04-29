@@ -23,14 +23,14 @@ async def user_info(message: types.Message):
         # If the command is sent in a group, retrieve the information of the mentioned user
         user = await bot.get_chat(mentioned_username)
     
-    user_id = user.id
-    full_name = user.full_name
-    username = user.username
+    user_id = mentioned_username.id
+    full_name = mentioned_username.full_name
+    username = mentioned_username
     
     await message.reply(
-        f"User ID: {message.user_id}\n"
-        f"Full Name: {message.full_name}\n"
-        f"Username: {message.username}"
+        f"User ID: {user_id}\n"
+        f"Full Name: {full_name}\n"
+        f"Username: {username}"
     )
 
 if __name__ == '__main__':
